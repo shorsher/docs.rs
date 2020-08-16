@@ -602,7 +602,12 @@ mod tests {
                 .binary(true)
                 .create()?;
 
-            let page = kuchiki::parse_html()
+            let mut opts = kuchiki::ParseOpts::default();
+            opts.on_parse_error = Some(Box::new(move |err| {
+                panic!(err.to_string());
+            }));
+
+            let page = kuchiki::parse_html_with_options(opts)
                 .one(env.frontend().get("/crate/binary/0.1.0").send()?.text()?);
             let warning = page.select_first("a.pure-menu-link.warn").unwrap();
 

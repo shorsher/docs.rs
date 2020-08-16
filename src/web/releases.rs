@@ -1124,7 +1124,15 @@ mod tests {
             queue.add_crate("bar", "0.1.0", -10)?;
             queue.add_crate("baz", "0.0.1", 10)?;
 
-            let full = kuchiki::parse_html().one(web.get("/releases/queue").send()?.text()?);
+            let mut opts = kuchiki::ParseOpts::default();
+            opts.on_parse_error = Some(Box::new(move |err| {
+                eprintln!("HTML parse error: {:?}", err);
+                panic!(err.to_string());
+            }));
+
+            let full = kuchiki::parse_html_with_options(opts)
+                .one(web.get("/releases/queue").send()?.text()?);
+
             let items = full
                 .select(".queue-list > li")
                 .expect("missing list items")

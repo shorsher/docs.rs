@@ -669,7 +669,14 @@ mod test {
                 .create()?;
             let web = env.frontend();
 
-            let foo_crate = kuchiki::parse_html().one(web.get("/crate/foo/0.0.1").send()?.text()?);
+            let mut opts = kuchiki::ParseOpts::default();
+            opts.on_parse_error = Some(Box::new(move |err| {
+                eprintln!("HTML parse error: {:?}", err);
+                panic!(err.to_string());
+            }));
+
+            let foo_crate = kuchiki::parse_html_with_options(opts)
+                .one(web.get("/crate/foo/0.0.1").send()?.text()?);
             for value in &["60%", "6", "10"] {
                 assert!(foo_crate
                     .select(".pure-menu-item b")
