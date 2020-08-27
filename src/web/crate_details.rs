@@ -8,6 +8,7 @@ use postgres::Client;
 use router::Router;
 use serde::{ser::Serializer, Serialize};
 use serde_json::Value;
+use std::collections::HashMap;
 
 // TODO: Add target name and versions
 
@@ -46,6 +47,7 @@ pub struct CrateDetails {
     documentation_url: Option<String>,
     total_items: Option<f32>,
     documented_items: Option<f32>,
+    target_links: HashMap<String, String>,
 }
 
 fn optional_markdown<S>(markdown: &Option<String>, serializer: S) -> Result<S::Ok, S::Error>
@@ -190,7 +192,19 @@ impl CrateDetails {
             documentation_url: krate.get("documentation_url"),
             documented_items: documented_items.map(|v| v as f32),
             total_items: total_items.map(|v| v as f32),
+            target_links: HashMap::new(),
         };
+
+        for target in &crate_details.doc_targets {
+            if target == &crate_details.metadata.default_target {
+                &crate_details
+                    .target_links
+                    .insert(target.to_string(), "".to_owned());
+            } else {
+                let path = format!("/{}", target);
+                &crate_details.target_links.insert(target.to_string(), path);
+            }
+        }
 
         if let Some(repository_url) = crate_details.repository_url.clone() {
             crate_details.github = repository_url.starts_with("http://github.com")

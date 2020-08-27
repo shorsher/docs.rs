@@ -223,7 +223,7 @@
                                 {%- set target_url = "/crate/" ~ krate.name ~ "/" ~ krate.version ~ "/target-redirect/" ~ target ~ "/" ~ inner_path -%}
 
                                 <li class="pure-menu-item">
-                                    <a href="{{ target_url | safe }}" class="pure-menu-link">{{ target }}</a>
+                                    <a href="{{ target_links.get(target) | safe }}" class="pure-menu-link">{{ target }}</a>
                                 </li>
                             {%- endfor -%}
                         </ul>
